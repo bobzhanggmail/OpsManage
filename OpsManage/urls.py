@@ -18,16 +18,17 @@ from django.conf.urls import url,include
 from django.contrib import admin
 from OpsManage.views import (index,assets,cron,deploy,
                              ansible,users,wssh,task,
-                             database)
+                             database,elfinder)
+from OpsManage.views.elfinder import finder
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework_jwt.views import obtain_jwt_token
 from OpsManage.restfull import (assets_api,cron_api,deploy_api,
                                 ansible_api,users_api,logs_api,
                                 db_api)
-
-
 urlpatterns = [
     url(r'^$',index.index),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^api/token/', obtain_jwt_token),
     url(r'^admin/', admin.site.urls),
     url(r'^login/',index.login),  
     url(r'^logout',index.logout), 
@@ -42,7 +43,9 @@ urlpatterns = [
     url(r'^assets_log/(?P<page>[0-9]+)/$',assets.assets_log),
     url(r'^assets_import/',assets.assets_import),
     url(r'^assets_search/',assets.assets_search),
+    url(r'^assets_server/',assets.assets_server),
     url(r'^assets/batch/',assets.assets_batch),
+    url(r'^assets/groups/(?P<id>[0-9]+)/$',assets.assets_groups),
     url(r'^cron_add',cron.cron_add),
     url(r'^cron_list/(?P<page>[0-9]+)/$',cron.cron_list),
     url(r'^cron_config',cron.cron_config),
@@ -99,6 +102,8 @@ urlpatterns = [
     url(r'^api/assets/(?P<id>[0-9]+)/$', assets_api.asset_detail),
     url(r'^api/service/$', assets_api.service_list), 
     url(r'^api/service/(?P<id>[0-9]+)/$', assets_api.service_detail), 
+    url(r'^api/project/$', assets_api.project_list), 
+    url(r'^api/project/(?P<id>[0-9]+)/$', assets_api.project_detail),     
     url(r'^api/group/$', assets_api.group_list), 
     url(r'^api/group/(?P<id>[0-9]+)/$',assets_api.group_detail), 
     url(r'^api/user/$', users_api.user_list), 
@@ -136,6 +141,8 @@ urlpatterns = [
     url(r'^api/sql/custom/$', db_api.sql_custom_list),
     url(r'^api/sql/custom/(?P<id>[0-9]+)/$', db_api.sql_custom_detail),
     url(r'^webssh/(?P<sid>[0-9]+)/$',wssh.wssh),
+    url(r'^roles/',elfinder.finder),
+    url(r'^elfinder/',include('elfinder.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

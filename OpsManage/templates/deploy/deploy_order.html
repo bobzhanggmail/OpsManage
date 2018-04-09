@@ -153,14 +153,14 @@
                                 	{% for ds in orderList %}
                                 		<tr class="odd gradeX">
                                 			<td class="text-center">
-								         	{% if ds.order_level == 1 %}
+								         	{% if ds.order_level == 0 %}
 								         		<button  type="button" class="btn btn-outline btn-default disabled">非紧急</button>
 								         	{% else %}
 								         		<button  type="button" class="btn btn-outline btn-warning disabled">紧急</button>
 								         	{% endif %} 
 								         	</td> 
                                 			<td class="text-center">
-                                				{{ds.order_project.project_name}} 
+                                				{{ds.order_project.project.project_name}} 
                                 			</td>
                                 			<td class="text-center">
                                 				{% if ds.order_comid %}

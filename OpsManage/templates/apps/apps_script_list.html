@@ -50,7 +50,7 @@
 												</button> 
                                 			</td>
                                 			<td class="text-center">
-												{% if ds.runid  %}
+												{% if user.is_superuser or ds.runid   %}
 													<a href="/apps/script/run/{{ds.runid}}"><button  type="button" class="btn btn-default"><abbr title="执行脚本"><i class="fa fa-play-circle-o"></i></button></a> 
 													<button  type="button" class="btn btn-default" onclick="deleteScript(this,{{ds.id}})"><abbr title="删除"><i class="glyphicon glyphicon-trash"></i></button>    
 												{% else %}
@@ -114,7 +114,7 @@
 			onOk: function(){
 				$.ajax({
 					  type: 'DELETE',
-					  url: '/api/playbook/'+id+'/',
+					  url: '/apps/script/file/'+id+'/',
 				      success:function(response){	
 				    	btnObj.removeAttr('disabled');
 	                	window.wxc.xcConfirm("删除成功！", window.wxc.xcConfirm.typeEnum.success);

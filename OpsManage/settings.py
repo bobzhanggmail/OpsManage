@@ -1,3 +1,5 @@
+#!/usr/bin/env python  
+# _#_ coding:utf-8 _*_ 
 """
 Django settings for OpsManage project.
 
@@ -28,6 +30,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_TASK_RESULT_EXPIRES = 60 * 60 * 24
 CELERYD_MAX_TASKS_PER_CHILD = 40
 CELERY_TRACK_STARTED = True
+CELERY_ENABLE_UTC = False
 CELERY_TIMEZONE='Asia/Shanghai'
 platforms.C_FORCE_ROOT = True
 
@@ -40,6 +43,10 @@ CELERY_QUEUES = (
     Queue('ansible',Exchange('ansible'),routing_key='ansible_#'),
 )
 CELERY_ROUTES = {
+    'OpsManage.tasks.sql.*':{'queue':'default','routing_key':'default'},
+    'OpsManage.tasks.assets.*':{'queue':'default','routing_key':'default'},
+    'OpsManage.tasks.cron.*':{'queue':'default','routing_key':'default'},
+    'OpsManage.tasks.sched.*':{'queue':'default','routing_key':'default'},
     'OpsManage.tasks.ansible.AnsibleScripts':{'queue':'ansible','routing_key':'ansible_scripts'},
     'OpsManage.tasks.ansible.AnsiblePlayBook':{'queue':'ansible','routing_key':'ansible_playbook'},
 }
@@ -92,6 +99,8 @@ INSTALLED_APPS = (
     'rest_framework',
     'djcelery',
     'channels',
+    'elfinder',
+    'storages',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -109,8 +118,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-#     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',
-#     ),              
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),             
 }
 
 
@@ -152,23 +164,7 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
-# AUTH_PASSWORD_VALIDATORS = [
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-#     },
-# ]
 
 
 # Internationalization
@@ -177,24 +173,19 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Shanghai'
 
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = False
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
      '/mnt/OpsManage/OpsManage/static/',
     )
-# TEMPLATE_DIRS = (
-# #     os.path.join(BASE_DIR,'mysite\templates'),
-#     '/mnt/OpsManage/OpsManage/templates/',
-# )
 
+MEDIA_ROOT = os.path.join(BASE_DIR,'upload/')
+MEDIA_URL = '/upload/'
+SFTP_CONF = {
+             'port':22,
+             'username':'root',
+             'password':'welliam',
+             'timeout':30
+             }  #修改成能sftp登陆OpsManage的账户
 
 LOGIN_URL = '/login'

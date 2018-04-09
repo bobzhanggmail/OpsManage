@@ -15,8 +15,7 @@
 <script src="/static/vendor/jquery/jquery.min.js"></script>
 
 <!-- Bootstrap Core CSS -->
-<link href="/static/vendor/bootstrap/css/bootstrap.min.css"
-	rel="stylesheet">
+<link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
 <!-- MetisMenu CSS -->
 <link href="/static/vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
@@ -201,21 +200,30 @@ pre {
 										<li><a href="/apps/playbook/upload/">上传剧本</a></li>
 										<li><a href="/apps/playbook/online/">在线编辑</a></li>
 										<li><a href="/apps/">剧本列表</a></li>
+										{% if user.is_superuser %}
+										<li><a href="/roles/">剧本管理</a></li>
+										{% endif %}
 									</ul> <!-- /.nav-third-level --></li>
 								<li><a href="/apps/log/">操作日志</a></li>
 							</ul> <!-- /.nav-second-level --></li>
 						<li><a href="#"><i class="fa fa-database fa-fw"></i> 数据管理<span
 								class="fa arrow"></span></a>
 							<ul class="nav nav-second-level">
-								<li><a href="/db/config/">基础配置</a></li>
+								<li><a href="#">MySQL<span class="fa arrow"></span></a>
+									<ul class="nav nav-third-level">
+										<li><a href="/db/config/">基础配置</a></li>
+										<li><a href="/db/ops/">管理入口</a></li>											
+									</ul>
+								</li>	
+<!-- 								<li><a href="#">Redis<span class="fa arrow"></span></a>	
+								<li><a href="#">MongoDB<span class="fa arrow"></span></a> -->
 								<li><a href="#">SQL管理<span class="fa arrow"></span></a>
 									<ul class="nav nav-third-level">
 										<li><a href="/db/sql/order/audit/">上线申请</a></li>
 										<li><a href="/db/sql/order/list/1/">工单列表</a></li>
 										<li><a href="/db/sql/order/search/">工单查询</a></li>
 									</ul>
-								</li>
-								<li><a href="/db/ops/">DB管理</a></li>	
+								</li>															
 								<li><a href="/db/sql/logs/1/">操作日志</a></li>
 							</ul> <!-- /.nav-second-level --></li>							
 						{% if user.is_superuser %}
@@ -456,7 +464,7 @@ pre {
 										</div>
 										<div class="timeline-body">
 											<p>申请人：{{ ds.order_user }}</p>
-											<p>部署项目：{{ ds.order_project.project_name }}</p>
+											<p>部署项目：{{ ds.order_project.project.project_name }}</p>
 											{% if ds.order_branch %}
 											<p>
 												部署版本：<a href="/deploy_order/status/{{ ds.id }}">{{ds.order_comid|slice:":7" }}</a>
@@ -483,7 +491,7 @@ pre {
 										</div>
 										<div class="timeline-body">
 											<p>申请人：{{ ds.order_user }}</p>
-											<p>部署项目：{{ ds.order_project.project_name }}</p>
+											<p>部署项目：{{ ds.order_project.project.project_name }}</p>
 											{% if ds.order_branch %}
 											<p>
 												部署版本：<a href="/deploy_order/status/{{ ds.id }}">{{ds.order_comid|slice:":7" }}</a>
@@ -510,7 +518,7 @@ pre {
 										</div>
 										<div class="timeline-body">
 											<p>申请人：{{ ds.order_user }}</p>
-											<p>部署项目：{{ ds.order_project.project_name }}</p>
+											<p>部署项目：{{ ds.order_project.project.project_name }}</p>
 											{% if ds.order_branch %}
 											<p>
 												部署版本：<a href="/deploy_order/status/{{ ds.id }}">{{ds.order_comid|slice:":7" }}</a>
@@ -537,7 +545,7 @@ pre {
 										</div>
 										<div class="timeline-body">
 											<p>申请人：{{ ds.order_user }}</p>
-											<p>部署项目：{{ ds.order_project.project_name }}</p>
+											<p>部署项目：{{ ds.order_project.project.project_name }}</p>
 											{% if ds.order_branch %}
 											<p>
 												部署版本：<a href="/deploy_order/status/{{ ds.id }}">{{ds.order_comid|slice:":7" }}</a>
@@ -554,7 +562,7 @@ pre {
 							</ul>
 						</div>
 						<!-- /.panel-body -->
-					</div>
+					</div>				
 					<!-- /.panel -->
 				</div>
 				<!-- /.col-lg-8 -->
@@ -605,6 +613,30 @@ pre {
 
 					<!-- /.panel .chat-panel -->
 				</div>
+<!-- 				<div class="col-lg-4">
+                    <div class="chat-panel panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-comments fa-fw"></i> ChatOps
+                        </div>
+                        /.panel-heading
+                        <div class="panel-body">
+                            <ul class="chat" id="chatTalk">
+                            </ul>
+                        </div>
+                        /.panel-body
+                        <div class="panel-footer">
+                            <div class="input-group">
+                                <input id="inputChatRoom" type="text" class="form-control input-sm" placeholder="Type your message here..." />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-warning btn-sm" id="btnChatRoom">
+                                        Send
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        /.panel-footer
+                    </div>					
+				</div> -->
 				<!-- /.col-lg-4 -->
 			</div>
 			<!-- /.row -->
@@ -613,6 +645,7 @@ pre {
 
 	</div>
 	<!-- /#wrapper -->
+	
 	<script type="text/javascript"> 
 	var myChart = echarts.init(document.getElementById('morris-area-chart'));
 	option = {
@@ -741,7 +774,95 @@ pre {
 
 
 </script>
-	{% endblock %}
+<!-- 	<script type="text/javascript" src="/static/js/reconnecting-websocket.js"></script>
+	<audio id="notifySound"><source src="/static/misc/hx.mp3" type="audio/mp3"> </audio>
+	<script type="application/javascript">
+	    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+	    var ws = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/ws/chats/",null, {debug: true, reconnectInterval: 3000} ); 
+	    ws.onmessage = function (message) {
+	        var rdata = JSON.parse(message.data);
+	        console.log(rdata);
+	        $('#notifySound')[0].play();
+			liHtml = '<li class="left clearfix">' +
+					      '<span class="chat-img pull-left">' +
+					            '<img src="/static/avatar/robot.gif" alt="User Avatar" class="img-circle" />' +
+					        '</span>' +
+					        '<div class="chat-body clearfix">' +
+					            '<div class="header">' +
+					                '<small class=" text-muted">' +
+					                    '<i class="fa fa-clock-o fa-fw"></i>'+ rdata['ctime'] + '</small>' +
+					                '<strong class="pull-left primary-font">'+ rdata['user'] + '</strong>' +
+					            '</div>' +
+					            '<p>' + rdata['msg'] +
+					            '</p>' +
+					        '</div>' +
+					   '</li>'	        
+			$("#chatTalk").append(liHtml); 
+	    }
+	    $("#btnChatRoom").click(function(){
+	        var sdata = {
+		          msg: $('#inputChatRoom').val(),
+		          user:"{{user}}"
+		        }
+		    console.log(sdata)
+			liHtml = '<li class="right clearfix">' +
+					      '<span class="chat-img pull-right">' +
+					            '<img src="/static/avatar/suser.gif" alt="User Avatar" class="img-circle" />' +
+					        '</span>' +
+					        '<div class="chat-body clearfix">' +
+					            '<div class="header">' +
+					                '<small class=" text-muted">' +
+					                    '<i class="fa fa-clock-o fa-fw"></i>'+ CurentTime() + '</small>' +
+					                '<strong class="pull-right primary-font">'+ "{{user}}" + '</strong>' +
+					            '</div>' +
+					            '<p>' + sdata['msg'] +
+					            '</p>' +
+					        '</div>' +
+					   '</li>'	        
+			$("#chatTalk").append(liHtml); 		    
+		    ws.send(JSON.stringify(sdata));
+	    })	
+	    ws.onclose = function(){
+	        console.log('closed....');
+	    };	    
+	    
+	    function CurentTime()  
+	    {   
+	        var now = new Date();  
+	          
+	        var year = now.getFullYear();       //年  
+	        var month = now.getMonth() + 1;     //月  
+	        var day = now.getDate();            //日  
+	          
+	        var hh = now.getHours();            //时  
+	        var mm = now.getMinutes();          //分  
+	        var ss = now.getSeconds();           //秒  
+	          
+	        var clock = year + "-";  
+	          
+	        if(month < 10)  
+	            clock += "0";  
+	          
+	        clock += month + "-";  
+	          
+	        if(day < 10)  
+	            clock += "0";  
+	              
+	        clock += day + " ";  
+	          
+	        if(hh < 10)  
+	            clock += "0";  
+	              
+	        clock += hh + ":";  
+	        if (mm < 10) clock += '0';   
+	        clock += mm + ":";   
+	           
+	        if (ss < 10) clock += '0';   
+	        clock += ss;   
+	        return(clock);   
+	}     
+	</script> -->
+	{% endblock %}			
 	<script type="text/javascript"> 
 	$(function() {
 		$.ajax({

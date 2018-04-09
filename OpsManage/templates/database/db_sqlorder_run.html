@@ -14,7 +14,7 @@
 </style>
 {% endblock %}
 {%block page-content %}
-{% if order.order_status == 1 or order.order_status == 6 %}
+{% if order.order_status == 1 and order.prem == 1 or order.order_status == 6 and order.prem == 1  %}
 	<div id="page-wrapper">
 	
 		<div class="row">
@@ -62,12 +62,20 @@
 									<i class="fa  fa-paper-plane-o"></i> 数据库选择
 								</legend>
 								<div class="form-group">
+									<label>环境类型</label> <br> 
+									<input type="text" class="form-control" id="db_env" name="db_env" value="{% if order.order_db.db_env == 'test' %}测试环境{%else%}生产环境{%endif%}" disabled> </input>						
+								</div>								
+								<div class="form-group">
+									<label>所属项目</label> <br> 
+									<input type="text" class="form-control" id="db_project" name="db_project" value="{{order.order_db.db_service.project.project_name}}" disabled> </input>						
+								</div>								
+								<div class="form-group">
 									<label>业务类型</label> <br> 
-									<input type="text" class="form-control" id="db_service" name="db_service" value="{{order.order_db.db_service}}" disabled> </input>						
+									<input type="text" class="form-control" id="db_service" name="db_service" value="{{order.order_db.db_service.service_name}}" disabled> </input>						
 								</div>									
 								<div class="form-group">
 									<label>数据库</label> <br> 
-									<input type="text" class="form-control" id="order_db" name="order_db" value="{{order.order_db.db_name}}({{order.order_db.db_host}})" disabled> </input>								
+									<input type="text" class="form-control" id="order_db" name="order_db" value="{{order.order_db.db_name}}({{order.order_db.db_host}})-{{order.order_db.db_mark|default:""}}" disabled> </input>								
 								</div>									
 <!-- 								<div class="form-group">
 									<label>数据库</label> <br> 
@@ -155,8 +163,7 @@
 						if (idx >= 0 && value.length == 0){
 							window.wxc.xcConfirm("请注意必填项不能为空~", window.wxc.xcConfirm.typeEnum.error);
 							btnObj.removeAttr('disabled');
-							return false;
-						};					
+							return false;					};					
 					};				
 					var editor = ace.edit("compile-editor");
 				    var order_sql = editor.getSession().getValue();  
@@ -169,13 +176,15 @@
 						},  //提交参数
 						success:function(response){
 							btnObj.removeAttr('disabled');
-							document.getElementById("auditResultDiv").style.display = ""; 
 							if (response["code"] == 200){
 								window.wxc.xcConfirm(response["msg"], window.wxc.xcConfirm.typeEnum.success);
 							}
 							else {
 								window.wxc.xcConfirm(response["msg"], window.wxc.xcConfirm.typeEnum.error);
 							}
+							{% if order.order_type == 'online' %}
+							document.getElementById("auditResultDiv").style.display = ""; 
+													
 							var resultHTML =  '<table class="table table-hover" id="auditResult">' +
 		                    '<thead>' +
 		                        '<tr>' +
@@ -196,7 +205,8 @@
 						                     '</tr>'
 						     }
 							resultHTML = resultHTML + trHtml + '</tbody></table>'
-							$('#auditResult').html(resultHTML);					
+							$('#auditResult').html(resultHTML);	
+							{% endif %}
 						},
 				    	error:function(response){
 				    		btnObj.removeAttr('disabled');
@@ -212,7 +222,7 @@
 		
 	</script>
 <!-- 	回滚页面 -->
-{% elif order.order_status == 2 or order.order_status == 3 or order.order_status == 7 %}
+{% elif order.order_status == 2 and order.prem == 1 and order.order_type == 'online' or order.order_status == 3 and order.prem == 1 and order.order_type == 'online' or order.order_status == 7 and order.prem == 1 and order.order_type == 'online' %}
 	<div id="page-wrapper">
 	
 		<div class="row">
@@ -240,15 +250,19 @@
 									{% csrf_token %}
 								<div class="form-group">
 									<label>环境类型</label> <br> 
-									{% if ds.db_env == 'test' %}
+									{% if order.order_db.db_env == 'test' %}
 									<input type="text" class="form-control" id="order_env" name="db_env" value="测试" disabled> </input>	
 									{% else %}	   
 									<input type="text" class="form-control" id="order_env" name="db_env" value="正式" disabled> </input>	
 									{% endif %}							
-								</div>										
+								</div>		
+								<div class="form-group">
+									<label>所属项目</label> <br> 
+									<input type="text" class="form-control" id="db_project" name="db_project" value="{{order.order_db.db_service.project.project_name}}" disabled> </input>						
+								</div>																	
 								<div class="form-group">
 									<label>业务类型</label> <br> 
-									<input type="text" class="form-control" id="db_service" name="db_service" value="{{order.order_db.db_service}}" disabled> </input>						
+									<input type="text" class="form-control" id="db_service" name="db_service" value="{{order.order_db.db_service.service_name}}" disabled> </input>						
 								</div>									
 								<div class="form-group">
 									<label>数据库</label> <br> 
@@ -522,8 +536,20 @@
 								<form role="form" method="post" id="audit_sql_order">
 									{% csrf_token %}
 								<div class="form-group">
+									<label>环境类型</label> <br> 
+									{% if order.order_db.db_env == 'test' %}
+									<input type="text" class="form-control" id="order_env" name="db_env" value="测试" disabled> </input>	
+									{% else %}	   
+									<input type="text" class="form-control" id="order_env" name="db_env" value="正式" disabled> </input>	
+									{% endif %}							
+								</div>										
+								<div class="form-group">
+									<label>所属项目</label> <br> 
+									<input type="text" class="form-control" id="db_project" name="db_project" value="{{order.order_db.db_service.project.project_name}}" disabled> </input>						
+								</div>										
+								<div class="form-group">
 									<label>业务类型</label> <br> 
-									<input type="text" class="form-control" id="db_service" name="db_service" value="{{order.order_db.db_service}}" disabled> </input>						
+									<input type="text" class="form-control" id="db_service" name="db_service" value="{{order.order_db.db_service.service_name}}" disabled> </input>						
 								</div>									
 								<div class="form-group">
 									<label>数据库</label> <br> 
@@ -550,7 +576,7 @@
 
 									</div>	
 								<div class="form-group">
-										<label>已取消SQL<i class="fa fa-info-circle" data-toggle="tooltip" title="说明用途"></i></label>														
+										<label>SQL内容<i class="fa fa-info-circle" data-toggle="tooltip" title="说明用途"></i></label>														
 										<div id="compile-editor" class="ace_editor">{{order.order_sql}}</div>
 										<p class="help-block">例如：insert into tablename (xxx,xxx,xxx) values (xxx,xxx,xxx);</p>							
 								</div>									
